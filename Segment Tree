@@ -1,0 +1,119 @@
+package com.pk.Problems;
+
+public class Segment {
+	private int[] a;
+	private int[] sTree;
+	private int n;
+	
+	public Segment(int n) {
+		a = new int[n];
+		this.n = n;
+		sTree = new int[2*n];
+	}
+	
+	/**
+	 * utility function to fill input array
+	 */
+	public void insertArray() {
+		a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
+		a[4] = 5;
+//		a[5] = 6;
+//		a[6] = 7;
+//		a[7] = 8;
+//		a[8] = 9;
+//		a[9] = 10;
+	}
+	
+	
+	/**
+	 * function to get the sum of range (ql - qr) in input array
+	 * @param l - start index of input array
+	 * @param r - end index of input array
+	 * @param ql - start index of query range 
+	 * @param qr - end index of query range
+	 * @param pos - index of parent element in range (l-r)
+	 * @return
+	 */
+	public int query(int l, int r, int ql, int qr, int pos)  
+	{  
+		if(ql <= l && qr >= r) { // full overlap
+			return sTree[pos];
+		}
+		
+		if(qr < l || ql > r) { // no overlap
+			return 0;
+		}
+		
+		int mid = (l + r) / 2;
+		
+		return query(l, mid, ql, qr, 2*pos) + query(mid+1, r, ql, qr, 2*pos+1);
+	}
+	
+	/**
+	 * function to build the segment tree array
+	 * @param l - start index of input array
+	 * @param r - end index of input array
+	 * @param pos - index of parent element in segment tree array
+	 * @return
+	 */
+	public int buildSegmentTree(int l, int r, int pos) {
+		
+		if(l == r) {
+			sTree[pos] = a[l];
+			return sTree[pos];
+		}
+		int mid = (l + r) / 2;
+		
+		sTree[pos] = buildSegmentTree(l, mid, 2 * pos) + buildSegmentTree(mid+1, r, (2 * pos) + 1);
+		return sTree[pos];
+	}
+	
+	/**
+	 * function to find the index of an element in segment tree array which have position pos in array a[] 
+	 * @param l - start index of input array
+	 * @param r - end index of input array
+	 * @param pos - index of element in input array
+	 * @param sTreePos - index of parent element in segment tree
+	 * @return
+	 */
+	public int findIndex(int l, int r, int pos, int sTreePos) {
+		if(l == r) {
+			return sTreePos;
+		}
+		
+		int mid = (l + r) / 2;
+		
+		return pos <= mid ? findIndex(l, mid, pos, sTreePos*2) : findIndex(mid+1, r, pos, sTreePos*2+1);
+
+	}
+	
+	/**
+	 * function to update the value in array a[] at position pos with value val
+	 * @param pos - index of element in input array
+	 * @param val - new value to be updated
+	 */
+	public void update(int pos, int val) {
+		
+		int index = findIndex(0, n-1, pos, 1);
+		
+		int diff = val - sTree[index];
+		sTree[index] = val;
+		
+		while(index >= 1) {
+			sTree[index/2] = sTree[index/2] + diff;
+			index = index / 2;
+		}
+	}
+	
+	/**
+	 * function to display the content of segment tree array
+	 */
+	public void display() {
+		for(int i=1; i<10; i++) {
+			System.out.println(sTree[i]);
+		}
+	}
+}
